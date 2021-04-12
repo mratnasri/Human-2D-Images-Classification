@@ -1,3 +1,4 @@
+print("start")
 import cv2
 import matplotlib as plt
 
@@ -9,6 +10,7 @@ clahe = cv2.createCLAHE()
 gray_img = clahe.apply(gray_img)
 gray_img2 = clahe.apply(gray_img2)
 
-cv2.imwrite("../../1.jpg", gray_img)
-cv2.imwrite("../../14.jpg", gray_img2)
+cv2.imwrite("../../trial1.jpg", gray_img)
+cv2.imwrite("../../trial2.jpg", gray_img2)
 # plt.show()
+print("end")
