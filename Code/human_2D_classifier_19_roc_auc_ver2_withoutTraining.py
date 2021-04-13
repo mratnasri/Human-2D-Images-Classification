@@ -1,28 +1,29 @@
-# only cropped
+# human_2D_classifier_15_dataAugmentation_ver3 with contrast stretching/scaling, only evaluation
 import os
 import os.path
-#from sklearn.datasets import load_files
+from sklearn.datasets import load_files
 import numpy as np
 import keras
-from keras.utils.np_utils import to_categorical
+from keras.utils import to_categorical
 from keras.preprocessing.image import array_to_img, img_to_array, load_img
 from keras.models import Sequential
+from keras.models import load_model
 from keras.layers import Dense, Activation, Conv2D, MaxPooling2D, Dense, Flatten
 from keras.optimizers import SGD
 from sklearn.model_selection import train_test_split
 from numpy import mean, std
 from matplotlib import pyplot as plt
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, classification_report, top_k_accuracy_score, ConfusionMatrixDisplay
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, classification_report, top_k_accuracy_score, ConfusionMatrixDisplay, roc_auc_score, auc, roc_curve, RocCurveDisplay
 import sys
 import cv2
 from glob import glob
 
-
+# 480x640 images
 # 131 classes
 
 #train_dir = '../../trial data/Training'
 all_images = '../../Complete 2D Human Images Dataset/*.jpg'
-dataAugmentation = '../../dataAugmentation_ver3/*_cropped.png'
+dataAugmentation = '../../dataAugmentation_ver3/*.png'
 categories_n = 200
 #classes = [x for x in range(200)]
 
@@ -37,7 +38,7 @@ def load_dataset(path, images, targets):
         #img = load_img(fn)
         # print(img.shape)
         images.append(img)
-        target = fn.split("/")[-1].split("-")[0]
+        target = fn.split("\\")[-1].split("-")[0]
         targets.append(target)
     return images, targets
 
@@ -45,79 +46,67 @@ def load_dataset(path, images, targets):
 images, targets = load_dataset(all_images, images, targets)
 images, targets = load_dataset(dataAugmentation, images, targets)
 images_num = len(images)
-print(targets)
 targets = [int(ele) - 1 for ele in targets]
 print("Number of total samples = ", images_num)
 # print(targets)
-# targets = to_categorical(targets, categories_n)
 
 # convert to grayscale
 gray_images = []
 for img in images:
     gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    #gray_img = cv2.equalizeHist(gray_img)
     gray_images.append(gray_img)
 
+#cv2.imwrite("../../stretched.png", gray_images[2])
 # split into training, testing and validation
 x_train, x_test, y_train, y_test = train_test_split(
     gray_images, targets, test_size=0.3, shuffle=True, stratify=targets)
 x_val, x_test, y_val, y_test = train_test_split(
     x_test, y_test, test_size=0.5, shuffle=True, stratify=y_test)
 
-y_train_ohe = to_categorical(y_train, categories_n)
-y_val_ohe = to_categorical(y_val, categories_n)
+"""y_train_ohe = to_categorical(y_train, categories_n)
+y_val_ohe = to_categorical(y_val, categories_n)"""
 
-"""# write split data
-train_dir = '../../Complete 2D Human Images Dataset/Train'
-val_dir = '../../Complete 2D Human Images Dataset/Validation'
-test_dir = '../../Complete 2D Human Images Dataset/Test'
-"""
 
 # preprocessing
 
-
-"""def convert_img_to_array(dir):
-    img_array = []
-    for file in dir:
-        img_array.append(img_to_array(load_img(file)))
-    return img_array"""
-
-
 #x_train = np.array(convert_img_to_array(x_train))
-x_train = np.array(x_train)
+"""x_train = np.array(x_train)
 print('Training set shape : ', x_train.shape)
 #x_val = np.array(convert_img_to_array(x_val))
 x_val = np.array(x_val)
 print('Validation set shape : ', x_val.shape)
-#x_test = np.array(convert_img_to_array(x_test))
+#x_test = np.array(convert_img_to_array(x_test))"""
 x_test = np.array(x_test)
 print('Test set shape : ', x_test.shape)
 
-x_train = x_train.reshape((x_train.shape[0], 480, 640, 1))
-x_val = x_val.reshape((x_val.shape[0], 480, 640, 1))
+"""x_train = x_train.reshape((x_train.shape[0], 480, 640, 1))
+x_val = x_val.reshape((x_val.shape[0], 480, 640, 1))"""
 x_test = x_test.reshape((x_test.shape[0], 480, 640, 1))
 
-for img in x_train:
+"""for img in x_train:
     img = 255*img/np.max(img)
-    img = img.astype('uint8')
+    img = img.astype(np.uint8)
 
 for img in x_val:
     img = 255*img/np.max(img)
-    img = img.astype('uint8')
+    img = img.astype(np.uint8)"""
 
 for img in x_test:
     img = 255*img/np.max(img)
-    img = img.astype('uint8')
+    img = img.astype(np.uint8)
 
+#cv2.imwrite("../../stretched2.jpg", x_train[2])
 # normalization
-x_train = x_train.astype('float32')
+"""x_train = x_train.astype('float32')
 x_train = x_train/255
 x_val = x_val.astype('float32')
-x_val = x_val/255
+x_val = x_val/255"""
 x_test = x_test.astype('float32')
 x_test = x_test/255
 
 
-def model_config():
+"""def model_config():
     model = Sequential()
     model.add(Conv2D(32, (3, 3), activation='relu',
                      kernel_initializer='he_uniform', input_shape=(480, 640, 1)))
@@ -146,7 +135,7 @@ def model_config():
                   metrics=['accuracy', keras.metrics.TopKCategoricalAccuracy()])
     return model
 
-# evaluate model using 5-fold cross validation
+
 
 
 def train_model(datax, datay, valx, valy):
@@ -191,12 +180,14 @@ plt.ylim([0, max(plt.ylim())])
 plt.title('Training and Validation Loss')
 plt.xlabel('epoch')
 # plt.show()
-plt.savefig('../../Outputs/model20_graph.png')
+plt.savefig('../../Outputs/model19_graph.png')
 
-model.save('../Models/human_2D_model20.h5')
-print("saved")
+model.save('../Models/human_2D_model19.h5')
+print("saved")"""
 
 # evaluation
+# load model
+model = load_model('../Models/human_2D_model19.h5')
 print("Model evaluation on test dataset: ")
 pred_prob = model.predict(x_test)
 #pred_class = model.predict_classes(x_test)
@@ -214,6 +205,35 @@ print("Classification Report: ")
 print(report)
 """f1 = f1_score(y_test, pred_class,average='macro')
 print("f1 score: ", f1)"""
+
+# calculate AUC
+auc_all = roc_auc_score(y_test, pred_prob, multi_class='ovr')
+print('AUC: %.3f' % auc_all)
+# calculate roc curve
+"""fpr, tpr, thresholds = roc_curve(y_test, pred_prob)
+# plot no skill
+plt.plot([0, 1], [0, 1], linestyle='--')
+# plot the roc curve for the model
+plt.plot(fpr, tpr, marker='.')
+plt.title('ROC curve on FEI Dataset')
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.grid()"""
+
+for i in range(len(categories_n)):
+    y_test_bin = np.int32(y_test == i)
+    y_score = pred_prob[:, i]
+    fpr, tpr, thresholds = roc_curve(y_test_bin, y_score)
+    roc_auc = auc(fpr, tpr)
+    roc_display = RocCurveDisplay(fpr=fpr, tpr=tpr, roc_auc=roc_auc)
+    roc_display.plot()
+#plt.legend(['acc', 'val_acc'], loc='lower right')
+#plt.savefig(os.path.join(result_dir, 'roc.png'))
+plt.savefig('../../Outputs/model19_2_roc.png')
+# show the plot
+# plt.show()
+plt.close()
+
 confusionMatrix = confusion_matrix(
     y_test, pred_class)  # row(true), column(predicted)
 np.set_printoptions(threshold=sys.maxsize)

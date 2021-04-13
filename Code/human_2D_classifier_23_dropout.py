@@ -12,7 +12,7 @@ from keras.layers import Dense, Activation, Conv2D, MaxPooling2D, Dropout, Flatt
 from keras.optimizers import SGD
 from sklearn.model_selection import train_test_split
 from numpy import mean, std
-#from matplotlib import pyplot as plt
+from matplotlib import pyplot as plt
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, classification_report, top_k_accuracy_score, ConfusionMatrixDisplay
 import sys
 import cv2
@@ -25,6 +25,7 @@ from glob import glob
 all_images = '../../Complete 2D Human Images Dataset/*.jpg'
 dataAugmentation = '../../dataAugmentation_ver3/*.png'
 noise_augmentation = '../../dataAugmentation_noise/*.png'
+translate_flip_augmentation = '../../dataAugmentation_translate_flip/*.png'
 categories_n = 200
 #classes = [x for x in range(200)]
 
@@ -39,13 +40,14 @@ def load_dataset(path, images, targets):
         #img = load_img(fn)
         # print(img.shape)
         images.append(img)
-        target = fn.split("\\")[-1].split("-")[0]  # \\ for windows
+        target = fn.split("/")[-1].split("-")[0]  # \\ for windows, / for linux
         targets.append(target)
     return images, targets
 
 
 images, targets = load_dataset(all_images, images, targets)
 images, targets = load_dataset(dataAugmentation, images, targets)
+images, targets = load_dataset(translate_flip_augmentation, images, targets)
 noise_images = []
 noise_targets = []
 noise_images, noise_targets = load_dataset(

@@ -1,4 +1,4 @@
-# human_2D_classifier_15_dataAugmentation_ver3 with histogram equalization
+# human_2D_classifier_15_dataAugmentation_ver3 with contrast stretching/scaling
 import os
 import os.path
 from sklearn.datasets import load_files
