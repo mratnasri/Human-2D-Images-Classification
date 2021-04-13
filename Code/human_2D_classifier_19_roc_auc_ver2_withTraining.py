@@ -1,4 +1,3 @@
-# human_2D_classifier_15_dataAugmentation_ver3 with contrast stretching/scaling, only evaluation
 import os
 import os.path
 from sklearn.datasets import load_files
@@ -64,33 +63,33 @@ x_train, x_test, y_train, y_test = train_test_split(
 x_val, x_test, y_val, y_test = train_test_split(
     x_test, y_test, test_size=0.5, shuffle=True, stratify=y_test)
 
-"""y_train_ohe = to_categorical(y_train, categories_n)
-y_val_ohe = to_categorical(y_val, categories_n)"""
+y_train_ohe = to_categorical(y_train, categories_n)
+y_val_ohe = to_categorical(y_val, categories_n)
 
 
 # preprocessing
 
 #x_train = np.array(convert_img_to_array(x_train))
-"""x_train = np.array(x_train)
+x_train = np.array(x_train)
 print('Training set shape : ', x_train.shape)
 #x_val = np.array(convert_img_to_array(x_val))
 x_val = np.array(x_val)
 print('Validation set shape : ', x_val.shape)
-#x_test = np.array(convert_img_to_array(x_test))"""
+#x_test = np.array(convert_img_to_array(x_test))
 x_test = np.array(x_test)
 print('Test set shape : ', x_test.shape)
 
-"""x_train = x_train.reshape((x_train.shape[0], 480, 640, 1))
-x_val = x_val.reshape((x_val.shape[0], 480, 640, 1))"""
+x_train = x_train.reshape((x_train.shape[0], 480, 640, 1))
+x_val = x_val.reshape((x_val.shape[0], 480, 640, 1))
 x_test = x_test.reshape((x_test.shape[0], 480, 640, 1))
 
-"""for img in x_train:
+for img in x_train:
     img = 255*img/np.max(img)
     img = img.astype(np.uint8)
 
 for img in x_val:
     img = 255*img/np.max(img)
-    img = img.astype(np.uint8)"""
+    img = img.astype(np.uint8)
 
 for img in x_test:
     img = 255*img/np.max(img)
@@ -98,15 +97,15 @@ for img in x_test:
 
 #cv2.imwrite("../../stretched2.jpg", x_train[2])
 # normalization
-"""x_train = x_train.astype('float32')
+x_train = x_train.astype('float32')
 x_train = x_train/255
 x_val = x_val.astype('float32')
-x_val = x_val/255"""
+x_val = x_val/255
 x_test = x_test.astype('float32')
 x_test = x_test/255
 
 
-"""def model_config():
+def model_config():
     model = Sequential()
     model.add(Conv2D(32, (3, 3), activation='relu',
                      kernel_initializer='he_uniform', input_shape=(480, 640, 1)))
@@ -134,8 +133,6 @@ x_test = x_test/255
     model.compile(optimizer=opt, loss='categorical_crossentropy',
                   metrics=['accuracy', keras.metrics.TopKCategoricalAccuracy()])
     return model
-
-
 
 
 def train_model(datax, datay, valx, valy):
@@ -180,14 +177,14 @@ plt.ylim([0, max(plt.ylim())])
 plt.title('Training and Validation Loss')
 plt.xlabel('epoch')
 # plt.show()
-plt.savefig('../../Outputs/model19_graph.png')
+plt.savefig('../../Outputs/model19_2_graph.png')
 
-model.save('../Models/human_2D_model19.h5')
-print("saved")"""
+model.save('../Models/human_2D_model19_2.h5')
+print("saved")
 
 # evaluation
-# load model
-model = load_model('../Models/human_2D_model19.h5')
+"""# load model
+model = load_model('../Models/human_2D_model19.h5')"""
 print("Model evaluation on test dataset: ")
 pred_prob = model.predict(x_test)
 #pred_class = model.predict_classes(x_test)
@@ -235,8 +232,8 @@ for i in range(categories_n):
     roc_display2.plot(ax=ax2)
 #plt.legend(['acc', 'val_acc'], loc='lower right')
 #plt.savefig(os.path.join(result_dir, 'roc.png'))
-fig1.savefig('../../Outputs/model19_roc_evalOnly.png')
-fig2.savefig('../../Outputs/model19_roc_evalOnly_withoutAuc.png')
+fig1.savefig('../../Outputs/model19_2_roc.png')
+fig2.savefig('../../Outputs/model19_2_roc_withoutAuc.png')
 # show the plot
 # plt.show()
 plt.close(fig1)
@@ -249,9 +246,9 @@ print("Confusion matrix: ")
 print(confusionMatrix)
 np.set_printoptions(threshold=False)
 #cm_labels = [x for x in range(20)]
-"""disp = ConfusionMatrixDisplay(
+disp = ConfusionMatrixDisplay(
     confusion_matrix=confusionMatrix)
 disp.plot()
 
 # plt.savefig('../../Outputs/model15_confusionMatrix.png')
-plt.show()"""
+plt.show()
