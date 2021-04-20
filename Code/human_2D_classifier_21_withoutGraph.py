@@ -1,4 +1,4 @@
-# human_2D_classifier_15_dataAugmentation_ver3 with histogram equalization
+# gaussian noise, min max stretching
 import os
 import os.path
 import random

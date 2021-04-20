@@ -1,4 +1,4 @@
-# with noise, 20 epochs
+# human_2D_classifier_15_dataAugmentation_ver3 with histogram equalization
 import os
 import os.path
 import random
@@ -12,7 +12,7 @@ from keras.layers import Dense, Activation, Conv2D, MaxPooling2D, Dropout, Flatt
 from keras.optimizers import SGD
 from sklearn.model_selection import train_test_split
 from numpy import mean, std
-from matplotlib import pyplot as plt
+#from matplotlib import pyplot as plt
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, classification_report, top_k_accuracy_score, ConfusionMatrixDisplay
 import sys
 import cv2
@@ -25,7 +25,6 @@ from glob import glob
 all_images = '../../Complete 2D Human Images Dataset/*.jpg'
 dataAugmentation = '../../dataAugmentation_ver3/*.png'
 noise_augmentation = '../../dataAugmentation_noise/*.png'
-#translate_flip_augmentation = '../../dataAugmentation_translate_flip/*.png'
 categories_n = 200
 #classes = [x for x in range(200)]
 
@@ -40,15 +39,13 @@ def load_dataset(path, images, targets):
         #img = load_img(fn)
         # print(img.shape)
         images.append(img)
-        # \\ for windows, / for linux
-        target = fn.split("/")[-1].split("-")[0]
+        target = fn.split("/")[-1].split("-")[0]  # \\ for windows
         targets.append(target)
     return images, targets
 
 
 images, targets = load_dataset(all_images, images, targets)
 images, targets = load_dataset(dataAugmentation, images, targets)
-#images, targets = load_dataset(translate_flip_augmentation, images, targets)
 noise_images = []
 noise_targets = []
 noise_images, noise_targets = load_dataset(
@@ -57,7 +54,7 @@ images_num = len(images)
 targets = [int(ele) - 1 for ele in targets]
 noise_targets = [int(ele) - 1 for ele in noise_targets]
 print("Number of total samples = ", images_num)
-print("Number of Noisy images = ", len(noise_images))
+print("Number of Noisy images = ",len(noise_images))
 # print(targets)
 
 # convert to grayscale
@@ -150,7 +147,7 @@ def model_config():
     model.add(Conv2D(32, (3, 3), activation='relu',
                      kernel_initializer='he_uniform'))
     model.add(MaxPooling2D(2, 2))
-    # model.add(Dropout(0.3))
+    model.add(Dropout(0.3))
     model.add(Flatten())
     model.add(Dense(300, activation='relu', kernel_initializer='he_uniform'))
     model.add(Dense(200, activation='softmax'))
@@ -166,7 +163,7 @@ def model_config():
 def train_model(datax, datay, valx, valy):
     model = model_config()
     # fit model
-    history = model.fit(datax, datay, epochs=20, batch_size=32,
+    history = model.fit(datax, datay, epochs=30, batch_size=32,
                         validation_data=(valx, valy), verbose=2)
     print('Accuracy: mean=%.3f std=%.3f, n=%d' %
           (mean(history.history['accuracy'])*100, std(history.history['accuracy'])*100, len(history.history['accuracy'])))
@@ -187,7 +184,7 @@ val_acc = history.history['val_accuracy']
 loss = history.history['loss']
 val_loss = history.history['val_loss']
 
-plt.figure(figsize=(8, 8))
+"""plt.figure(figsize=(8, 8))
 plt.subplot(2, 1, 1)
 plt.plot(acc, label='Training Accuracy')
 plt.plot(val_acc, label='Validation Accuracy')
@@ -205,9 +202,9 @@ plt.ylim([0, max(plt.ylim())])
 plt.title('Training and Validation Loss')
 plt.xlabel('epoch')
 # plt.show()
-plt.savefig('../../Outputs/model25_graph.png')
+plt.savefig('../../Outputs/model21_dropout_graph.png')"""
 
-model.save('../Models/human_2D_model25.h5')
+model.save('../Models/human_2D_model21_dropout.h5')
 print("saved")
 
 # evaluation
@@ -235,10 +232,9 @@ print("Confusion matrix: ")
 print(confusionMatrix)
 np.set_printoptions(threshold=False)
 #cm_labels = [x for x in range(20)]
-disp = ConfusionMatrixDisplay(
+"""disp = ConfusionMatrixDisplay(
     confusion_matrix=confusionMatrix)
 disp.plot()
 
 # plt.savefig('../../Outputs/model15_confusionMatrix.png')
-plt.show()
-print("end")
+plt.show()"""
