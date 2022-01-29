@@ -1,0 +1,24 @@
+# calculate AUC
+auc_all = roc_auc_score(y_test, pred_prob, multi_class='ovr')
+print('AUC: %.3f' % auc_all)
+# calculate roc curve
+y_test = np.array(y_test)
+fig1 = plt.figure()
+ax1 = fig1.add_subplot(1, 1, 1)
+fig2 = plt.figure()
+ax2 = fig2.add_subplot(1, 1, 1)
+for i in range(categories_n):
+    y_test_bin = (y_test == i).astype(np.int32)
+    y_score = pred_prob[:, i]
+    fpr, tpr, thresholds = roc_curve(y_test_bin, y_score)
+    roc_auc = auc(fpr, tpr)
+    roc_display1 = RocCurveDisplay(fpr=fpr, tpr=tpr, roc_auc=roc_auc)
+    roc_display1.plot(ax=ax1)
+    roc_display2 = RocCurveDisplay(fpr=fpr, tpr=tpr)
+    roc_display2.plot(ax=ax2)
+fig1.savefig('../../Outputs/model19_2_roc.png')
+fig2.savefig('../../Outputs/model19_2_roc_withoutAuc.png')
+# show the plot
+# plt.show()
+plt.close(fig1)
+plt.close(fig2)
